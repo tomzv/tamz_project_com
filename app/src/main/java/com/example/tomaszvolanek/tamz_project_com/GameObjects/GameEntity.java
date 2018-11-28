@@ -1,5 +1,7 @@
 package com.example.tomaszvolanek.tamz_project_com.GameObjects;
 
+import android.graphics.Bitmap;
+
 public abstract class GameEntity {
 
 
@@ -11,8 +13,13 @@ public abstract class GameEntity {
 
     private double velocity;
 
-    public GameEntity(int xPos, int yPos, int pxHeight, int pxWidth) {
+    Bitmap image;
 
+    public GameEntity(int xPos, int yPos, Bitmap image, double velocity) {
+        this.positionX = xPos;
+        this.positionY = yPos;
+        this.image = image;
+        this.velocity = velocity;
 
     }
 
@@ -56,15 +63,25 @@ public abstract class GameEntity {
         this.velocity = velocity;
     }
 
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
+
+    public Bitmap getImage() {
+        return this.image;
+    }
+
     public void moveUp() {
         this.positionY -= velocity;
     }
 
     public void moveDown() {
+
         this.positionY += velocity;
     }
 
     public void moveRight() {
+
         this.positionX += velocity;
     }
 
