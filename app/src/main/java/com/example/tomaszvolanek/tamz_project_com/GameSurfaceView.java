@@ -1,9 +1,11 @@
 package com.example.tomaszvolanek.tamz_project_com;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.hardware.SensorEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -20,7 +22,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
     private SurfaceHolder holder;
 
     Player player;
-    ArrayList<Enemy> enemies;
+    ArrayList<Enemy> enemies = new ArrayList<Enemy>();
     ArrayList<Fuel> fuel;
     ArrayList<Projectile> projectiles;
 
@@ -87,15 +89,35 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
 
     }
     protected void updateGame() {
-        player.moveDown();
-        player.moveRight();
+        //int height = holder.getSurfaceFrame().height();
+        //int width = holder.getSurfaceFrame().width();
+        for(Enemy enemy : enemies) {
+            if(enemy.getBoundary().intersect(player.getBoundary())) {
+                player.setPositionX(0);
+            }
+        }
+        player.move();
+
+
     }
     protected void drawGame(Canvas canvas) {
         canvas.drawColor(Color.BLACK);
         canvas.drawBitmap(player.getImage(), player.getPositionX(), player.getPositionY(), null);
+
+        for(Enemy enemy : enemies) {
+            canvas.drawBitmap(enemy.getImage(), enemy.getPositionX(), enemy.getPositionY(), null);
+        }
     }
     protected void initialize() {
         this.player = new Player(0, 0, BitmapFactory
-                .decodeResource(this.getResources(), R.drawable.ship), 1);
+                .decodeResource(this.getResources(), R.drawable.ship), 0, 0);
+        enemies.add(new Enemy(250, 250,
+                BitmapFactory.decodeResource(this.getResources(),
+                        R.drawable.enemy),0, 0));
+    }
+
+    public void onSensorEvent(SensorEvent event) {
+        this.player.setVelocityX(event.values[0]*(-2));
+        this.player.setVelocityY(event.values[1]*(2));
     }
 }

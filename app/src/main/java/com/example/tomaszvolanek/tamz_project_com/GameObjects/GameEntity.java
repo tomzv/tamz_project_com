@@ -1,6 +1,8 @@
 package com.example.tomaszvolanek.tamz_project_com.GameObjects;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
+import android.support.constraint.solver.widgets.Rectangle;
 
 public abstract class GameEntity {
 
@@ -11,15 +13,17 @@ public abstract class GameEntity {
     private int pixelHeight;
     private int pixelWidth;
 
-    private double velocity;
+    private double velocityX;
+    private double velocityY;
 
     Bitmap image;
 
-    public GameEntity(int xPos, int yPos, Bitmap image, double velocity) {
+    public GameEntity(int xPos, int yPos, Bitmap image, double velocityX, double velocityY) {
         this.positionX = xPos;
         this.positionY = yPos;
         this.image = image;
-        this.velocity = velocity;
+        this.velocityX = velocityX;
+        this.velocityY = velocityY;
 
     }
 
@@ -55,37 +59,41 @@ public abstract class GameEntity {
         this.pixelWidth = pixelWidth;
     }
 
-    public double getVelocity() {
-        return this.velocity;
+    public double getVelocityX() {
+        return this.velocityX;
     }
 
-    public void setVelocity(double velocity) {
-        this.velocity = velocity;
+    public void setVelocityX(double velocity) {
+        this.velocityX = velocity;
     }
 
     public void setImage(Bitmap image) {
         this.image = image;
     }
 
+    public double getVelocityY() {
+        return this.velocityY;
+    }
+
+    public void setVelocityY(double velocity) {
+        this.velocityY = velocity;
+    }
+
+    public void move() {
+        this.positionX += this.velocityX;
+        this.positionY += this.velocityY;
+    }
+
+
     public Bitmap getImage() {
         return this.image;
     }
-
-    public void moveUp() {
-        this.positionY -= velocity;
+    public Rect getBoundary() {
+        return new Rect(this.positionX,
+                this.positionY,
+                this.image.getHeight()+this.positionX,
+                this.image.getWidth()+this.positionY);
     }
 
-    public void moveDown() {
 
-        this.positionY += velocity;
-    }
-
-    public void moveRight() {
-
-        this.positionX += velocity;
-    }
-
-    public void moveLeft() {
-        this.positionX -= velocity;
-    }
 }
