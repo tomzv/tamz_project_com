@@ -1,24 +1,38 @@
 package com.example.tomaszvolanek.tamz_project_com;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener2;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class PlayActivity extends Activity implements SensorEventListener2{
 
     protected GameSurfaceView gameView;
     private SensorManager sensorManager;
+    private ConstraintLayout clayout;
+
+    private TextView score;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature((Window.FEATURE_NO_TITLE));
         super.onCreate(savedInstanceState);
+        //only run in portrait mode
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //Binding the ACCELEROMETER
         sensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
         sensorManager
@@ -29,11 +43,19 @@ public class PlayActivity extends Activity implements SensorEventListener2{
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN
                 ,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+
         gameView = new GameSurfaceView(this);
+        gameView.setOnTouchListener(myTouchListener);
         setContentView(gameView);
-
-
     }
+
+    View.OnTouchListener myTouchListener = new ImageView.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            gameView.onTouch(event);
+            return true;
+        }
+    };
 
     @Override
     protected void onResume() {

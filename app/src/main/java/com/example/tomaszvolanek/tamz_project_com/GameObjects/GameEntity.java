@@ -91,9 +91,15 @@ public abstract class GameEntity {
     public Rect getBoundary() {
         return new Rect(this.positionX,
                 this.positionY,
-                this.image.getHeight()+this.positionX,
-                this.image.getWidth()+this.positionY);
+                this.image.getWidth()+this.positionX,
+                this.image.getHeight()+this.positionY);
     }
 
+    public boolean inCanvas(int width, int height) {
+        return (positionX > -this.image.getWidth()
+                && positionX < width + this.image.getWidth()
+                && positionY > -this.image.getHeight()
+                && positionY < height);
+    }
 
 }
