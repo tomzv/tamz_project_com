@@ -7,6 +7,7 @@ public class Player extends GameEntity {
         super(xPos, yPos, image, velocityX, velocityY);
     }
 
+    private int score;
     private boolean shooting = false;
     private int fuel;
 
@@ -22,6 +23,13 @@ public class Player extends GameEntity {
     }
     public void setFuel(int fuel) {
         this.fuel = fuel;
+    }
+
+    public int getScore() {
+        return this.score;
+    }
+    public void setScore(int score) {
+        this.score = score;
     }
 
 

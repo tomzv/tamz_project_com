@@ -2,11 +2,13 @@ package com.example.tomaszvolanek.tamz_project_com;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -34,8 +36,9 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
     private Thread gameThread;
     private SurfaceHolder holder;
 
+    private SharedPreferences myPreferences;
+
     //field members encapsulating game difficulty
-    private String difficultyFile = "difficultyhard.xml";
     private LevelDifficulty levelDifficulty;
 
     //height and width of the canvas holder
@@ -50,6 +53,10 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
     //fps
     private final static int MAX_FPS = 40;
     private final static int FRAME_PERIOD = 1000 / MAX_FPS;
+
+    //scoreboard and fuel
+    private final String score = "SCORE: ";
+    private final String fuel = "FUEL: ";
 
     //timers
     private long shotTimer = 500;
@@ -126,7 +133,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
         Bitmap fuelImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.fuel);
         Bitmap projectileImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.projectile);
 
-        //checks if a new enemy can be spawned
+        //checks if an enemy intersets any other object
         Iterator<GameEntity> enemyIterator = enemies.iterator();
         while(enemyIterator.hasNext()) {
 
@@ -146,14 +153,10 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
                     if(e.getBoundary().intersect(p.getBoundary())) {
                         enemyIterator.remove();
                         projectileIterator.remove();
-
-                        /*
-                        player.addScore();
+                        player.setScore(player.getScore() + 10);
                         if(e instanceof Fuel) {
-                            player.addFuel();
+                            player.setFuel(player.getFuel() + 50);
                         }
-                        break;
-                        */
                     }
                 }
 
@@ -167,10 +170,11 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
             int spawnX = rnd.nextInt(this.width-enemyImage.getWidth());
             int spawnY = this.height;
             //checks if a fuel ship needs to be spawned, if not, then spawns a regular enemy
-            if(this.fuelSpawn % levelDifficulty.getFuelShips() == 0) {
+            if(this.fuelSpawn % levelDifficulty.getFuelShips() == 0 && this.fuelSpawn != 0) {
                 enemies.add(new Fuel(spawnX,
                         spawnY,
                         fuelImage,0, levelDifficulty.getEnemyVelocity()));
+                player.setFuel(player.getFuel() - 50);
                 fuelSpawn++;
             } else {
                 enemies.add(new Enemy(spawnX,
@@ -211,6 +215,10 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
                 player.getPositionY() + player.getVelocityY())) {
             player.move();
         }
+        //checks if the player has enough fuel
+        if(player.getFuel() <= 0) {
+           this.isRunning = false;
+        }
 
     }
     //draws the game state onto the canvas
@@ -225,14 +233,28 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
             canvas.drawBitmap(projectile.getImage(), projectile.getPositionX(), projectile.getPositionY(), null);
 
         }
+
+        //Score and fuel text
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(40);
+        canvas.drawText(this.score + player.getScore(), 10, 45,  paint);
+        canvas.drawText(this.fuel + player.getFuel(), 800, 45, paint);
     }
     //initializes the game state
     protected void initialize()  {
-        this.LoadLevelDifficulty(this.difficultyFile);
+        myPreferences = getContext().getSharedPreferences("myPref", Context.MODE_PRIVATE);
+        String difficulty = myPreferences.getString("difficulty", "easy");
+        this.LoadLevelDifficulty("difficulty" + difficulty + ".xml");
+
         this.player = new Player(100, 100, BitmapFactory
                 .decodeResource(this.getResources(), R.drawable.ship), 0, 0);
         lastShotTime = System.currentTimeMillis();
         lastSpawn = System.currentTimeMillis();
+
+        player.setFuel(levelDifficulty.getPlayerFuel());
+        player.setScore(0);
     }
 
     public void onSensorEvent(SensorEvent event) {

@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
 
         //assigning listeners to buttons
         playButton.setOnTouchListener(playTouchListener);
+        settingsButton.setOnTouchListener(settingsTouchListener);
 
         //visual design of the buttons
         playButton.setBackgroundColor(Color.rgb(100,55, 100));
@@ -53,6 +54,7 @@ public class MainActivity extends Activity {
         highScoreButton.setAlpha(0.75f);
         settingsButton.setBackgroundColor(Color.rgb(100,55, 100));
         settingsButton.setAlpha(0.75f);
+
 
 
         mainActivity = findViewById(R.id.mainAct);
@@ -77,5 +79,20 @@ public class MainActivity extends Activity {
             return false;
         }
     };
+    Button.OnTouchListener settingsTouchListener = new Button.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch(event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                {
+                    Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                    startActivity(intent);
+                    break;
+                }
 
+            }
+            return false;
+        }
+    };
 }
