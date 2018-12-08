@@ -8,12 +8,20 @@ public class Player extends GameEntity {
     }
 
     private boolean shooting = false;
+    private int fuel;
 
     public boolean getShooting() {
         return this.shooting;
     }
     public void setShooting(boolean b) {
         this.shooting = b;
+    }
+
+    public int getFuel() {
+        return this.fuel;
+    }
+    public void setFuel(int fuel) {
+        this.fuel = fuel;
     }
 
 

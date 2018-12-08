@@ -2,6 +2,7 @@ package com.example.tomaszvolanek.tamz_project_com;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,29 +19,43 @@ import com.example.tomaszvolanek.tamz_project_com.GameObjects.GameEntity;
 import com.example.tomaszvolanek.tamz_project_com.GameObjects.Player;
 import com.example.tomaszvolanek.tamz_project_com.GameObjects.Projectile;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 
 public class GameSurfaceView extends SurfaceView implements Runnable {
     private boolean isRunning = false;
     private Thread gameThread;
     private SurfaceHolder holder;
 
+    //field members encapsulating game difficulty
+    private String difficultyFile = "difficultyhard.xml";
+    private LevelDifficulty levelDifficulty;
+
+    //height and width of the canvas holder
     private int height;
     private int width;
 
+    //game entities
     Player player;
     ArrayList<GameEntity> enemies = new ArrayList<GameEntity>();
     ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 
+    //fps
     private final static int MAX_FPS = 40;
     private final static int FRAME_PERIOD = 1000 / MAX_FPS;
 
+    //timers
     private long shotTimer = 500;
     private long lastShotTime;
-    private long enemySpawnTime = 1000;
     private long lastSpawn;
+    private int fuelSpawn = 0;
 
 
     public  GameSurfaceView(Context context) {
@@ -66,7 +81,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
             }
         }
     }
-
+    //runs the game loop
     @Override
     public void run() {
         initialize();
@@ -105,8 +120,10 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
         }
 
     }
+    //updates the game entities
     protected void updateGame() {
         Bitmap enemyImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.enemy);
+        Bitmap fuelImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.fuel);
         Bitmap projectileImage = BitmapFactory.decodeResource(this.getResources(), R.drawable.projectile);
 
         //checks if a new enemy can be spawned
@@ -144,16 +161,27 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
 
 
         }
-        //checks if a projectile can be fired
-        if((System.currentTimeMillis()- lastSpawn) > enemySpawnTime) {
+        //checks if an enemy can be spawned and spawns the enemy
+        if((System.currentTimeMillis()- lastSpawn) > levelDifficulty.getEnemySpawnTime()) {
             Random rnd = new Random();
             int spawnX = rnd.nextInt(this.width-enemyImage.getWidth());
             int spawnY = this.height;
-            enemies.add(new Enemy(spawnX,
-                    spawnY,
-                    BitmapFactory.decodeResource(this.getResources(), R.drawable.enemy),0, -5));
-            lastSpawn = System.currentTimeMillis();
+            //checks if a fuel ship needs to be spawned, if not, then spawns a regular enemy
+            if(this.fuelSpawn % levelDifficulty.getFuelShips() == 0) {
+                enemies.add(new Fuel(spawnX,
+                        spawnY,
+                        fuelImage,0, levelDifficulty.getEnemyVelocity()));
+                fuelSpawn++;
+            } else {
+                enemies.add(new Enemy(spawnX,
+                        spawnY,
+                        enemyImage,0, levelDifficulty.getEnemyVelocity()));
+                lastSpawn = System.currentTimeMillis();
+                fuelSpawn++;
+            }
+
         }
+        //checks if the projectile can be fired and spaws the projectile
         if(player.getShooting() && (System.currentTimeMillis() - lastShotTime) > shotTimer) {
             projectiles.add(
                     new Projectile(
@@ -185,6 +213,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
         }
 
     }
+    //draws the game state onto the canvas
     protected void drawGame(Canvas canvas) {
         canvas.drawColor(Color.BLACK);
         canvas.drawBitmap(player.getImage(), player.getPositionX(), player.getPositionY(), null);
@@ -197,7 +226,9 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
 
         }
     }
-    protected void initialize() {
+    //initializes the game state
+    protected void initialize()  {
+        this.LoadLevelDifficulty(this.difficultyFile);
         this.player = new Player(100, 100, BitmapFactory
                 .decodeResource(this.getResources(), R.drawable.ship), 0, 0);
         lastShotTime = System.currentTimeMillis();
@@ -222,6 +253,27 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
                 player.setShooting(false);
                 break;
             }
+        }
+
+    }
+    //loads level difficulty into a class field from xml files in the assets folder
+    public void LoadLevelDifficulty(String fileName)  {
+        LevelXmlParser parser = new LevelXmlParser();
+        InputStream raw =  null;
+
+        AssetManager am = this.getContext().getAssets();
+        try {
+
+            raw = am.open(fileName);
+
+            List<LevelDifficulty> xmlList = parser.parse(raw);
+            this.levelDifficulty = xmlList.get(0);
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+        catch(XmlPullParserException e) {
+            e.printStackTrace();
         }
 
     }

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<leveldifficulty>
+    <difficulty enemyspawntime="500" enemyvelocity="-8" playerfuel="2000" fuelships="10"/>
+</leveldifficulty>

@@ -3,6 +3,7 @@ package com.example.tomaszvolanek.tamz_project_com;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -18,6 +19,8 @@ import android.view.WindowManager;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.tomaszvolanek.tamz_project_com.GameObjects.Player;
 
 public class PlayActivity extends Activity implements SensorEventListener2{
 
@@ -47,6 +50,9 @@ public class PlayActivity extends Activity implements SensorEventListener2{
         gameView = new GameSurfaceView(this);
         gameView.setOnTouchListener(myTouchListener);
         setContentView(gameView);
+        gameView.player = new Player(100, 100, BitmapFactory
+                .decodeResource(this.getResources(), R.drawable.ship), 0, 0);
+
     }
 
     View.OnTouchListener myTouchListener = new ImageView.OnTouchListener() {
