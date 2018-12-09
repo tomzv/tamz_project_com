@@ -1,5 +1,6 @@
 package com.example.tomaszvolanek.tamz_project_com;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,9 +27,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 
 public class GameSurfaceView extends SurfaceView implements Runnable {
@@ -37,6 +40,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
     private SurfaceHolder holder;
 
     private SharedPreferences myPreferences;
+    private SharedPreferences.Editor prefEditor;
 
     //field members encapsulating game difficulty
     private LevelDifficulty levelDifficulty;
@@ -123,9 +127,9 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
                 updateGame();
                 sleepTime += FRAME_PERIOD;
             }
-
         }
-
+        //calls GameOver activity
+        getContext().startActivity(new Intent(this.getContext(), GameOverActivity.class));
     }
     //updates the game entities
     protected void updateGame() {
@@ -140,6 +144,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
             GameEntity e = enemyIterator.next();
             if(e.getBoundary().intersect(player.getBoundary())) {
                 enemyIterator.remove();
+                saveHighScore(String.valueOf(player.getScore()));
                 isRunning = false;
 
             }
@@ -217,7 +222,8 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
         }
         //checks if the player has enough fuel
         if(player.getFuel() <= 0) {
-           this.isRunning = false;
+            saveHighScore(String.valueOf(player.getScore()));
+            this.isRunning = false;
         }
 
     }
@@ -297,6 +303,16 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
         catch(XmlPullParserException e) {
             e.printStackTrace();
         }
+
+    }
+    public void saveHighScore(String score) {
+        Set<String> highScores = new HashSet<String>();
+        myPreferences = getContext().getSharedPreferences("scorePref", Context.MODE_PRIVATE);
+        prefEditor = myPreferences.edit();
+        highScores = myPreferences.getStringSet("highScore", highScores);
+        highScores.add(score);
+        prefEditor.putStringSet("highScore", highScores);
+        prefEditor.commit();
 
     }
 }

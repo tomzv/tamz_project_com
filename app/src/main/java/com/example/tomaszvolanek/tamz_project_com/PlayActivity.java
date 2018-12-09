@@ -53,6 +53,7 @@ public class PlayActivity extends Activity implements SensorEventListener2{
         gameView.player = new Player(100, 100, BitmapFactory
                 .decodeResource(this.getResources(), R.drawable.ship), 0, 0);
 
+
     }
 
     View.OnTouchListener myTouchListener = new ImageView.OnTouchListener() {
